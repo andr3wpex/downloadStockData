@@ -20,7 +20,7 @@ interval = '1d' # 1d, 1wk, 1m
 
 query_string = f"https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={period1}&period2={period2}&interval={interval}&events=history&includeAdjustedClose=true"
 
-df_link = pd.read_csv(query_string)
+df_link = pd.read_csv(query_string, index_col='Date')
 
 # Methon 2: leveraging the yf library (yf.download method)
 
@@ -37,3 +37,5 @@ print("the yf library with the same parameters shifts the dataset by one trading
 print(df_yf.head(3))
 print(df_yf.tail(3))
 
+# using yf, includes the preceeding working day
+print(df_link.shape, df_yf.shape)
