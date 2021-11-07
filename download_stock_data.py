@@ -1,41 +1,66 @@
 """ 
 The choice of the below methods for downloading stock data would produce
 identical data, but for different date ranges due to yf being offset by
-one business day. Different methods require different start and end parameters. 
+one business day. Different methods require different begin and end parameters. 
 """
 
 import time
 import datetime
 import pandas as pd
+import yfinance as yf
 
-start = "2021-01-01"
+class DataDownloader:
+    def __init__(self, begin, end, ticker, interval='1d'):
+        """ 
+        Download stock data between "begin" and "end" dates
+        for "ticker" with "interval" as an optional parameter.
+        The default is daily.
+        """
+        
+        self.begin = begin
+        self.end = end
+        self.ticker = ticker
+        self.interval = interval
+        print(self.begin)
+        self.begin_dt = int(time.mktime(datetime.datetime(int(self.begin.split("-")[0]), int(self.begin.split("-")[1]), int(self.begin.split("-")[2]), 23, 59).timetuple()))
+        self.end_dt = int(time.mktime(datetime.datetime(int(self.end.split("-")[0]), int(self.end.split("-")[1]), int(self.end.split("-")[2]), 23, 59).timetuple()))
+        self.query_string = f"https://query1.finance.yahoo.com/v7/finance/download/{self.ticker}?period1={self.begin_dt}&period2={self.end_dt}&interval={self.interval}&events=history&includeAdjustedClose=true"
+        print("__init__ has run")
+        print(self.begin)
+
+    def direct_link_df(self):
+        # Method 1: using a query string to download stock data 
+        df = pd.read_csv(self.query_string, index_col='Date')
+        return df
+
+    def yf_library_df(self):
+        # Method 2: leveraging the yf library (yf.download method)
+        df = yf.download(self.ticker, start=self.begin, end=self.end, group_by="ticker")
+        return df
+
+    def output_summary(self):
+        print("\nticker: " + self.ticker + " was selected between " + self.begin + " and " + self.end)
+        print("\n\n-----query string-----\n")
+        print("using query strings will return the trading days in the date ranges:\n")
+        print(self.direct_link_df().head())
+        print(self.direct_link_df().tail())
+
+        print("\n\n-----yf.download-----\n")
+        print("the yf library with the same parameters shifts the dataset by one trading day which may be more than 1 calendar day:\n")
+        print(self.yf_library_df().head())
+        print(self.yf_library_df().tail())
+
+        print("\nyf library would include the preceeding working day (out of the specified range)\n")
+        print(self.direct_link_df().shape, self.yf_library_df().shape)
+
+begin = "2021-01-01"
 end = "2021-01-31"
 
-# Method 1: using a query string to download stock data 
+# interval = 1d, 1wk, 1m, optional parameter
 
-ticker = 'AAPL'
-period1 = int(time.mktime(datetime.datetime(int(start.split("-")[0]), int(start.split("-")[1]), int(start.split("-")[2]), 23, 59).timetuple()))
-period2 = int(time.mktime(datetime.datetime(int(end.split("-")[0]), int(end.split("-")[1]), int(end.split("-")[2]), 23, 59).timetuple()))
-interval = '1d' # 1d, 1wk, 1m
+apple = DataDownloader(begin, end, 'AAPL')
+microsoft = DataDownloader(begin, end, 'MSFT')
 
-query_string = f"https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={period1}&period2={period2}&interval={interval}&events=history&includeAdjustedClose=true"
-
-df_link = pd.read_csv(query_string, index_col='Date')
-
-# Methon 2: leveraging the yf library (yf.download method)
-
-import yfinance as yf
-df_yf = yf.download(ticker, start=start, end=end, group_by="ticker")
-
-print("\n\n-----query string-----")
-print("using query strings will return the exact date ranges:")
-print(df_link.head(3))
-print(df_link.tail(3))
-
-print("\n\n-----yf.download-----")
-print("the yf library with the same parameters shifts the dataset by one trading day which may be more than 1 calendar day")
-print(df_yf.head(3))
-print(df_yf.tail(3))
-
-# using yf, includes the preceeding working day
-print(df_link.shape, df_yf.shape)
+apple.output_summary()
+print("\n__________________MICROSOFT__________________\n")
+microsoft.output_summary()
