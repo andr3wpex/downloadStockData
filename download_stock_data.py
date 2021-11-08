@@ -13,21 +13,19 @@ class DataDownloader:
     def __init__(self, begin, end, ticker, interval='1d'):
         """ 
         Download stock data between "begin" and "end" dates
-        for "ticker" with "interval" as an optional parameter.
-        The default is daily.
+        for "ticker".
+        The default granularity for 'interval' is daily.
         """
         
         self.begin = begin
         self.end = end
         self.ticker = ticker
         self.interval = interval
-        print(self.begin)
+        
         self.begin_dt = int(time.mktime(datetime.datetime(int(self.begin.split("-")[0]), int(self.begin.split("-")[1]), int(self.begin.split("-")[2]), 23, 59).timetuple()))
         self.end_dt = int(time.mktime(datetime.datetime(int(self.end.split("-")[0]), int(self.end.split("-")[1]), int(self.end.split("-")[2]), 23, 59).timetuple()))
         self.query_string = f"https://query1.finance.yahoo.com/v7/finance/download/{self.ticker}?period1={self.begin_dt}&period2={self.end_dt}&interval={self.interval}&events=history&includeAdjustedClose=true"
-        print("__init__ has run")
-        print(self.begin)
-
+        
     def direct_link_df(self):
         # Method 1: using a query string to download stock data 
         df = pd.read_csv(self.query_string, index_col='Date')
