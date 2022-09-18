@@ -51,8 +51,8 @@ class DataDownloader:
         print("\nyf library would include the preceeding working day (out of the specified range)\n")
         print(self.direct_link_df().shape, self.yf_library_df().shape)
 
-begin = "2021-01-01"
-end = "2021-01-31"
+begin = "2022-01-01"
+end = "2022-01-31"
 
 # interval = 1d, 1wk, 1m, optional parameter
 
